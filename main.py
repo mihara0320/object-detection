@@ -1,4 +1,4 @@
-# import argparse
+import argparse
 import os
 import tarfile
 import six.moves.urllib as urllib
@@ -9,7 +9,6 @@ import tensorflow as tf
 from utils import visualization_utils as vis_util
 from utils import label_map_util
 
-# cap = cv2.VideoCapture(0)
 MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
@@ -21,7 +20,6 @@ NUM_CLASSES = 90
 def pre_process():
     opener = urllib.request.URLopener()
     opener.retrieve(DOWNLOAD_BASE + MODEL_FILE, MODEL_FILE)
-
     tar_file = tarfile.open(MODEL_FILE)
     for file in tar_file.getmembers():
         file_name = os.path.basename(file.name)
@@ -29,9 +27,8 @@ def pre_process():
             tar_file.extract(file, os.getcwd())
 
 
-def process():
+def process(cap):
     pre_process()
-    cap = cv2.VideoCapture("sample.mp4")
     detection_graph = tf.Graph()
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
@@ -76,9 +73,27 @@ def process():
                     break
 
 
-def main():
-    process()
+def main(args):
+    cap = None
+    if(args.f == '' and args.w is False):
+        cap = cv2.VideoCapture("sample.mp4")
+    elif(args.f == '' and args.w is True):
+        cap = cv2.VideoCapture(0)
+    elif(args.f != '' and args.w is False):
+        try:
+            cap = cv2.VideoCapture(args.f)
+        except:
+            return print('Invalid video file')  
+    else:
+        return print('Something went wrong!')
+
+    return process(cap)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-w', action="store_true",
+                        help='Set this flag if you want to feed video from your webcam')
+    parser.add_argument('-f', type=str, default='', help='Path to the video')
+    args = parser.parse_args()
+    main(args)
