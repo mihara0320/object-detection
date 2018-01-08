@@ -1,7 +1,7 @@
 # import argparse
 import os
 import tarfile
-
+import six.moves.urllib as urllib
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -17,8 +17,10 @@ PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 PATH_TO_LABELS = os.path.join('data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-def process():
-    cap = cv2.VideoCapture("sample.mp4")
+
+def pre_process():
+    opener = urllib.request.URLopener()
+    opener.retrieve(DOWNLOAD_BASE + MODEL_FILE, MODEL_FILE)
 
     tar_file = tarfile.open(MODEL_FILE)
     for file in tar_file.getmembers():
@@ -26,6 +28,10 @@ def process():
         if 'frozen_inference_graph.pb' in file_name:
             tar_file.extract(file, os.getcwd())
 
+
+def process():
+    pre_process()
+    cap = cv2.VideoCapture("sample.mp4")
     detection_graph = tf.Graph()
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
@@ -48,9 +54,9 @@ def process():
             num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
             while True:
-                image_np = cap.read()
+                ret, image_np = cap.read()
                 image_np_expanded = np.expand_dims(image_np, axis=0)
-                (boxes, scores, classes) = sess.run(
+                (boxes, scores, classes, num) = sess.run(
                     [detection_boxes, detection_scores, detection_classes, num_detections],
                     feed_dict={image_tensor: image_np_expanded})
 
@@ -70,4 +76,9 @@ def process():
                     break
 
 
-process()
+def main():
+    process()
+
+
+if __name__ == '__main__':
+    main()
