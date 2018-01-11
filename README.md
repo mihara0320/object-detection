@@ -3,6 +3,8 @@
 This is final project for Advanced Python (I720) <br />
 This module makes use of the 
 [Tensorflow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) for detecting object within the input video data, as well as [OpenCV](https://pypi.python.org/pypi/opencv-python) for handing video data input.
+> NB: Works only with Python3, since Tensorflow does not support Python2 
+
 ## Install dependencies
 
 All the necessary files coming from Tensorflow Object Detection API are already compiled in this project.
