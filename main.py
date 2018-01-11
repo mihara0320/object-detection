@@ -15,7 +15,6 @@ def main(args):
             cap = cv2.VideoCapture(args.f)
         except:
             return print('Invalid video file')
-            
     else:
         return print('Something went wrong!')
 
